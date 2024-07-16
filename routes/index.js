@@ -3,6 +3,10 @@ var router = express.Router();
 const userController = require('../controllers/userController')
 const auth = require('../middleware/auth')
 /* GET home page. */
+router.get('/signup', function(req, res){
+    res.send('GET sign up')
+})
+
 router.post('/signup', userController.signupPOST);
 
 router.post('/login', userController.loginPOST);

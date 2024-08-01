@@ -125,7 +125,7 @@ exports.GETpostbyid = async(req, res, next) => {
 }
 
 exports.GETpostcomments = async(req, res, next) => {
-    const comments = await Comment.find({post: req.params.id}).populate('author')
+    const comments = await Comment.find({post: req.params.id}).populate('author').populate('post')
 
     return res.json(comments)
 }

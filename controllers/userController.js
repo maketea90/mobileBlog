@@ -131,7 +131,7 @@ exports.GETpostcomments = async(req, res, next) => {
 }
 
 exports.POSTcomment = [
-    body('message').trim().notEmpty().withMessage('enter a valid message'),
+    body('message').trim().notEmpty().escape().withMessage('enter a valid message'),
     asyncHandler(async(req, res, next) => {
         const errors = validationResult(req)
         if(!errors.isEmpty()){

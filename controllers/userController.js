@@ -158,6 +158,13 @@ exports.changeUsername = [
         if(!errors.isEmpty()){
             return res.json({errors})
         } else {
+
+            const user = await User.find({username: req.body.username})
+
+            if(user){
+                return res.json('username already exists')
+            }
+
             await User.findOneAndUpdate({_id: req.userId}, {username: req.username})
 
             return res.json('successfully updated username')

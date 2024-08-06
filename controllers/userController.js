@@ -149,3 +149,35 @@ exports.POSTcomment = [
         }
     })
 ]
+
+
+exports.changeUsername = [
+    body('username').trim().notEmpty().escape().withMessage('enter a valid username'),
+    asyncHandler(async(req, res, next) => {
+        const errors = validationResult(req)
+        if(!errors.isEmpty()){
+            return res.json({errors})
+        } else {
+            await User.findOneAndUpdate({_id: req.userId}, {username: req.username})
+
+            return res.json('successfully updated username')
+        }
+    })
+]
+
+exports.changePassword = [
+    body('password').trim().notEmpty().escape().withMessage('enter a valid password'),
+    asyncHandler(async(req, res, next) => {
+        const errors = validationResult(req)
+        if(!errors.isEmpty()){
+            return res.json({errors})
+        } else {
+
+            const password = await bcrypt.hash(req.body.password, 10)
+
+            await User.findOneAndUpdate({_id: req.userId}, {password})
+
+            return res.json('successfully updated password')
+        }
+    })
+]

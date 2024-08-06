@@ -21,4 +21,8 @@ router.get('/posts/:id/comments', userController.GETpostcomments)
 
 router.post('/posts/:id/comments', auth, userController.POSTcomment)
 
+router.post('/changeUsername', auth, userController.changeUsername)
+
+router.post('/changePassword', auth, userController.changePassword)
+
 module.exports = router;

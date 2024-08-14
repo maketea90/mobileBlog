@@ -6,6 +6,7 @@ var logger = require('morgan');
 const cors = require('cors')
 require('dotenv').config()
 
+
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 
@@ -20,8 +21,19 @@ async function main() {
 }
 
 var app = express();
+const http = require("http").Server(app);
 app.use(cors())
 
+
+const socketIO = require("socket.io")(http, 
+  
+//   {
+// 	cors: {
+// 		origin: "http://localhost:3000",
+// 	},
+// }
+
+);
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
@@ -34,6 +46,51 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
+
+const generateID = () => Math.random().toString(36).substring(2, 10);
+let chatRooms = [];
+
+socketIO.on("connection", (socket) => {
+	console.log(`⚡: ${socket.id} user just connected!`);
+
+	socket.on("createRoom", (name) => {
+		socket.join(name);
+		chatRooms.unshift({ id: generateID(), name, messages: [] });
+		socket.emit("roomsList", chatRooms);
+	});
+
+	socket.on("findRoom", (id) => {
+		let result = chatRooms.filter((room) => room.id == id);
+		// console.log(chatRooms);
+		socket.emit("foundRoom", result[0].messages);
+		// console.log("Messages Form", result[0].messages);
+	});
+
+	socket.on("newMessage", (data) => {
+		const { room_id, message, user, timestamp } = data;
+		let result = chatRooms.filter((room) => room.id == room_id);
+		const newMessage = {
+			id: generateID(),
+			text: message,
+			user,
+			time: `${timestamp.hour}:${timestamp.mins}`,
+		};
+		console.log("New Message", newMessage);
+		socket.to(result[0].name).emit("roomMessage", newMessage);
+		result[0].messages.push(newMessage);
+
+		socket.emit("roomsList", chatRooms);
+		socket.emit("foundRoom", result[0].messages);
+	});
+	socket.on("disconnect", () => {
+		socket.disconnect();
+		console.log("🔥: A user disconnected");
+	});
+});
+
+app.get("/api", (req, res) => {
+	res.json(chatRooms);
+});
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

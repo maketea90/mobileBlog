@@ -85,7 +85,12 @@ exports.loginPOST = [
 ]
 
 exports.GETposts = async(req, res, next) => {
-    const posts = await Post.find({}).sort({timestamp: -1}).populate('author')
+
+    const quantity = (req.query.page-1)*10
+
+    console.log(quantity)
+
+    const posts = await Post.find({}).sort({timestamp: -1}).skip(quantity).limit(10).populate('author')
 
     // console.log(posts)
 

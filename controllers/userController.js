@@ -27,7 +27,7 @@ exports.signupPOST = [
             const {username} = req.body
             const user = await User.findOne({username})
             if(user){
-                return res.json({error: 'username already exists'})
+                return res.status(404).json('username already exists')
             } else {
                 
                 const hashedPassword = await bcrypt.hash(req.body.password, 10)

@@ -11,13 +11,13 @@ router.post('/signup', userController.signupPOST);
 
 router.post('/login', userController.loginPOST);
 
-router.get('/posts', userController.GETposts)
+router.get('/posts', auth, userController.GETposts)
 
 router.post('/posts', auth, userController.createPost)
 
-router.get('/posts/:id', userController.GETpostbyid)
+router.get('/posts/:id', auth, userController.GETpostbyid)
 
-router.get('/posts/:id/comments', userController.GETpostcomments)
+router.get('/posts/:id/comments', auth, userController.GETpostcomments)
 
 router.post('/posts/:id/comments', auth, userController.POSTcomment)
 

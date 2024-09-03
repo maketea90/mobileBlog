@@ -8,8 +8,8 @@ const { body, validationResult } = require('express-validator')
 
 
 exports.signupPOST = [
-    body('username').trim().notEmpty().escape().withMessage('invalid username'),
-    body('password').trim().notEmpty().escape().withMessage('invalid password'),
+    body('username').trim().notEmpty().isLength({max: 20}).escape().withMessage('username must be between 1 and 20 characters'),
+    body('password').trim().notEmpty().isLength({max: 20}).escape().withMessage('password must be between 1 and 20 characters'),
     body('confirmPassword').custom((value, { req }) => {
         if (value !== req.body.password) {
           throw new Error('Password confirmation does not match password');
@@ -19,15 +19,33 @@ exports.signupPOST = [
         return true;
       }),
     asyncHandler(async (req, res, next) => {
+
+        const jsonResponses = {
+            usernameError: '',
+            passwordError: '',
+            confirmPasswordError: ''
+        } 
+
         const errors = validationResult(req)
         // console.log(errors)
         if (!errors.isEmpty()) {
-            return res.json({ errors })
+            errors.errors.forEach((error) => {
+                if(error.path === 'username'){
+                    jsonResponses.usernameError = error.msg
+                } else if (error.path === 'password'){
+                    jsonResponses.passwordError = error.msg
+                } else {
+                    jsonResponses.confirmPasswordError = error.msg
+                }
+            
+            })
+            return res.status(400).json(jsonResponses)
         } else {
             const {username} = req.body
             const user = await User.findOne({username})
             if(user){
-                return res.status(404).json('username already exists')
+                jsonResponses.usernameError = 'username already exists'
+                return res.status(400).json(jsonResponses)
             } else {
                 
                 const hashedPassword = await bcrypt.hash(req.body.password, 10)
@@ -48,8 +66,8 @@ exports.signupPOST = [
 ]
 
 exports.loginPOST = [
-    body('username').trim().notEmpty().escape().withMessage('username must not be empty'),
-    body('password').trim().notEmpty().escape().withMessage('password must not be empty'),
+    body('username').trim().notEmpty().isLength({max: 20}).escape().withMessage('username must not be empty'),
+    body('password').trim().notEmpty().isLength({max: 20}).escape().withMessage('password must not be empty'),
     asyncHandler(async(req, res, next) => {
         const errors = validationResult(req)
 

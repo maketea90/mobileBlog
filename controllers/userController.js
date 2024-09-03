@@ -48,14 +48,26 @@ exports.signupPOST = [
 ]
 
 exports.loginPOST = [
-    body('username').trim().notEmpty().escape().withMessage('invalid username'),
-    body('password').trim().notEmpty().escape().withMessage('invalid password'),
+    body('username').trim().notEmpty().escape().withMessage('username must not be empty'),
+    body('password').trim().notEmpty().escape().withMessage('password must not be empty'),
     asyncHandler(async(req, res, next) => {
         const errors = validationResult(req)
 
+        const jsonResponses = {
+            usernameError: '',
+            passwordError: ''
+        }
+
         if(!errors.isEmpty()){
             console.log(errors)
-            return res.status(400).json({errors})
+            errors.forEach((error) => {
+                if(error.path === 'username'){
+                    jsonResponses.usernameError = error.msg
+                } else {
+                    jsonResponses.passwordError = error.msg
+                }
+            })
+            return res.status(400).json(jsonResponses)
         } else {
             const {username, password} = req.body
 
@@ -64,14 +76,14 @@ exports.loginPOST = [
             user = user[0]
 
             if(!user){
-                return res.json('username does not exist')
+                return res.status(400).json('username does not exist')
             }
                 
             
             const match = await bcrypt.compare(password, user.password)
 
             if(!match){
-                return res.json('incorrect password')
+                return res.status(400).json('incorrect password')
             }
 
             jwt.sign({userId: user._id}, process.env.SECRET, (err, asyncToken) => {

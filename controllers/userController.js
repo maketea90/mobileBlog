@@ -76,14 +76,16 @@ exports.loginPOST = [
             user = user[0]
 
             if(!user){
-                return res.status(400).json('username does not exist')
+                jsonResponses.usernameError = 'username already exists'
+                return res.status(400).json(jsonResponses)
             }
                 
             
             const match = await bcrypt.compare(password, user.password)
 
             if(!match){
-                return res.status(400).json('incorrect password')
+                jsonResponses.passwordError = 'incorrect password'
+                return res.status(400).json(jsonResponses)
             }
 
             jwt.sign({userId: user._id}, process.env.SECRET, (err, asyncToken) => {

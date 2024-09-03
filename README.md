@@ -26,7 +26,7 @@ POST /posts - creates a new post. payload should contain a title and the main me
 
 GET /posts/:id - fetches a single post, parametrised by its id in the database.
 
-GET /posts/:id/comments - fetches all comments linked to a single post, parametrised by the post id
+GET /posts/:id/comments - fetches all comments linked to a single post, parametrised by the post id.
 
-POST /posts/:id/comments - creates a new comment under/linked to a single post, parametrised by the post id
+POST /posts/:id/comments - creates a new comment under/linked to a single post, parametrised by the post id.
 

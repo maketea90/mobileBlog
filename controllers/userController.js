@@ -54,7 +54,8 @@ exports.loginPOST = [
         const errors = validationResult(req)
 
         if(!errors.isEmpty()){
-            return res.json({errors})
+            console.log(errors)
+            return res.status(400).json({errors})
         } else {
             const {username, password} = req.body
 
@@ -166,7 +167,9 @@ exports.changeUsername = [
 
             const user = await User.find({username: req.body.username})
 
-            if(user){
+            console.log(user)
+
+            if(user.length !== 0){
                 return res.status(400).json('username already exists')
             }
 

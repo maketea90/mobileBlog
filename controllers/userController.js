@@ -66,8 +66,8 @@ exports.signupPOST = [
 ]
 
 exports.loginPOST = [
-    body('username').trim().notEmpty().isLength({max: 20}).escape().withMessage('username must not be empty'),
-    body('password').trim().notEmpty().isLength({max: 20}).escape().withMessage('password must not be empty'),
+    body('username').trim().notEmpty().withMessage('username must not be empty').escape(),
+    body('password').trim().notEmpty().withMessage('password must not be empty').escape(),
     asyncHandler(async(req, res, next) => {
         const errors = validationResult(req)
 

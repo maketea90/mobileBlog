@@ -60,7 +60,7 @@ exports.loginPOST = [
 
         if(!errors.isEmpty()){
             console.log(errors)
-            errors.forEach((error) => {
+            errors.errors.forEach((error) => {
                 if(error.path === 'username'){
                     jsonResponses.usernameError = error.msg
                 } else {

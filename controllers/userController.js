@@ -8,8 +8,8 @@ const { body, validationResult } = require('express-validator')
 
 
 exports.signupPOST = [
-    body('username').trim().notEmpty().isLength({max: 20}).escape().withMessage('username must be between 1 and 20 characters'),
-    body('password').trim().notEmpty().isLength({max: 20}).escape().withMessage('password must be between 1 and 20 characters'),
+    body('username').trim().notEmpty().withMessage('username must not be empty').isLength({max: 20}).escape().withMessage('username must be between 1 and 20 characters'),
+    body('password').trim().notEmpty().withMessage('password must not be empty').isLength({max: 20}).escape().withMessage('password must be between 1 and 20 characters'),
     body('confirmPassword').custom((value, { req }) => {
         if (value !== req.body.password) {
           throw new Error('Password confirmation does not match password');

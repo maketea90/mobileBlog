@@ -8,6 +8,7 @@ const { body, validationResult } = require('express-validator')
 
 
 exports.signupPOST = [
+    body('email').trim().notEmpty().withMessage('email must not be empty').isLength({max: 20}).escape().withMessage('email must be between 1 and 20 characters'),
     body('username').trim().notEmpty().withMessage('username must not be empty').isLength({max: 20}).escape().withMessage('username must be between 1 and 20 characters'),
     body('password').trim().notEmpty().withMessage('password must not be empty').isLength({max: 20}).escape().withMessage('password must be between 1 and 20 characters'),
     body('confirmPassword').custom((value, { req }) => {
@@ -21,6 +22,7 @@ exports.signupPOST = [
     asyncHandler(async (req, res, next) => {
 
         const jsonResponses = {
+            emailError: '',
             usernameError: '',
             passwordError: '',
             confirmPasswordError: ''
@@ -34,25 +36,32 @@ exports.signupPOST = [
                     jsonResponses.usernameError = error.msg
                 } else if (error.path === 'password'){
                     jsonResponses.passwordError = error.msg
-                } else {
+                } else if (error.path === 'email'){
+                    jsonResponses.emailError = error.msg
+                }else {
                     jsonResponses.confirmPasswordError = error.msg
                 }
             
             })
             return res.status(400).json(jsonResponses)
         } else {
-            const {username} = req.body
+            const {username, email} = req.body
             const user = await User.findOne({username})
+            const userbyemail = await User.findOne({email})
             if(user){
                 jsonResponses.usernameError = 'username already exists'
                 return res.status(400).json(jsonResponses)
-            } else {
+            } else if(userbyemail){
+                jsonResponses.emailError = 'email already in use'
+                return res.status(400).json(jsonResponses)
+            }else {
                 
                 const hashedPassword = await bcrypt.hash(req.body.password, 10)
 
                 // console.log(hashedPassword)
                 
                 const newUser = new User({
+                    email: req.body.email,
                     username: req.body.username,
                     password: hashedPassword
                 })
@@ -66,35 +75,35 @@ exports.signupPOST = [
 ]
 
 exports.loginPOST = [
-    body('username').trim().notEmpty().withMessage('username must not be empty').escape(),
+    body('email').trim().notEmpty().withMessage('email must not be empty').escape(),
     body('password').trim().notEmpty().withMessage('password must not be empty').escape(),
     asyncHandler(async(req, res, next) => {
         const errors = validationResult(req)
 
         const jsonResponses = {
-            usernameError: '',
+            emailError: '',
             passwordError: ''
         }
 
         if(!errors.isEmpty()){
             console.log(errors)
             errors.errors.forEach((error) => {
-                if(error.path === 'username'){
-                    jsonResponses.usernameError = error.msg
+                if(error.path === 'email'){
+                    jsonResponses.emailError = error.msg
                 } else {
                     jsonResponses.passwordError = error.msg
                 }
             })
             return res.status(400).json(jsonResponses)
         } else {
-            const {username, password} = req.body
+            const {email, password} = req.body
 
-            let user = await User.find({username})
+            let user = await User.find({email})
 
             user = user[0]
 
             if(!user){
-                jsonResponses.usernameError = 'username already exists'
+                jsonResponses.emailError = 'email not in use'
                 return res.status(400).json(jsonResponses)
             }
                 
@@ -123,7 +132,7 @@ exports.GETposts = async(req, res, next) => {
 
     console.log(quantity)
 
-    const posts = await Post.find({}).sort({timestamp: -1}).skip(quantity).limit(10).populate('author')
+    const posts = await Post.find({}).sort({timestamp: -1}).skip(quantity).limit(10).populate('author', 'username')
 
     // console.log(posts)
 
@@ -157,13 +166,13 @@ exports.createPost = [
 ]
 
 exports.GETpostbyid = async(req, res, next) => {
-    const post = await Post.findById(req.params.id).populate('author')
+    const post = await Post.findById(req.params.id).populate('author', 'username')
 
     return res.json(post)
 }
 
 exports.GETpostcomments = async(req, res, next) => {
-    const comments = await Comment.find({post: req.params.id}).populate('author').populate('post')
+    const comments = await Comment.find({post: req.params.id}).populate('author', 'username').populate('post')
 
     return res.json(comments)
 }

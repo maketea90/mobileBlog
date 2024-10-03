@@ -203,7 +203,7 @@ exports.changeUsername = [
     asyncHandler(async(req, res, next) => {
         const errors = validationResult(req)
         if(!errors.isEmpty()){
-            return res.json({errors})
+            return res.json(errors[0].msg)
         } else {
 
             const user = await User.find({username: req.body.username})
@@ -226,7 +226,7 @@ exports.changePassword = [
     asyncHandler(async(req, res, next) => {
         const errors = validationResult(req)
         if(!errors.isEmpty()){
-            return res.json({errors})
+            return res.json(errors[0].msg)
         } else {
 
             const password = await bcrypt.hash(req.body.password, 10)

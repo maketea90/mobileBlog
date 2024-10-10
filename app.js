@@ -4,6 +4,7 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 const cors = require('cors')
+const nodemailer = require("nodemailer")
 require('dotenv').config()
 
 
@@ -38,57 +39,47 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 
-function sendEmail({ recipient_email, OTP }) {
+
+// async..await is not allowed in global scope, must use a wrapper
+
+  // send mail with defined transport object
+
+  // console.log("Message sent: %s", info.messageId);
+  // Message sent: <d786aa62-4e0a-070a-47ed-0b0666549519@ethereal.email>
+
+
+
+async function sendEmail({ recipient_email, OTP }) {
+  
+
+  const transporter = nodemailer.createTransport({
+    host: "smtp.ethereal.email",
+    port: 587,
+    // secure: false, // true for port 465, false for other ports
+    auth: {
+      user: process.env.MY_EMAIL,
+      pass: process.env.MY_PASSWORD,
+    },
+  });
+
+   
+
   return new Promise((resolve, reject) => {
-    var transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: {
-        user: process.env.MY_EMAIL,
-        pass: process.env.MY_PASSWORD,
-      },
-    });
 
     const mail_configs = {
-      from: process.env.MY_EMAIL,
-      to: recipient_email,
-      subject: "Joes blog app password recovery",
-      html: `<!DOCTYPE html>
-<html lang="en" >
-<head>
-  <meta charset="UTF-8">
-  <title>CodePen - OTP Email Template</title>
-  
-
-</head>
-<body>
-<!-- partial:index.partial.html -->
-<div style="font-family: Helvetica,Arial,sans-serif;min-width:1000px;overflow:auto;line-height:2">
-  <div style="margin:50px auto;width:70%;padding:20px 0">
-    <div style="border-bottom:1px solid #eee">
-      
-    </div>
-    <p style="font-size:1.1em">Hi,</p>
-    <p>Thank you for using Joes blog app. Use the following OTP to complete your Password Recovery Procedure. OTP is valid for 5 minutes</p>
-    <h2 style="background: #00466a;margin: 0 auto;width: max-content;padding: 0 10px;color: #fff;border-radius: 4px;">${OTP}</h2>
-    <p style="font-size:0.9em;">Regards,<br />Joe</p>
-    <hr style="border:none;border-top:1px solid #eee" />
-    <div style="float:right;padding:8px 0;color:#aaa;font-size:0.8em;line-height:1;font-weight:300">
-      
-      
-    </div>
-  </div>
-</div>
-<!-- partial -->
-  
-</body>
-</html>`,
+      from: process.env.MY_EMAIL, // sender address
+      to: recipient_email, // list of receivers
+      subject: "Joe's blog app OTP", // Subject line
+      text: `${OTP}`, // plain text body
+      html: "<b>Hello world?</b>", // html body
     };
+
     transporter.sendMail(mail_configs, function (error, info) {
       if (error) {
         console.log(error);
         return reject({ message: `An error has occured` });
       }
-      return resolve({ message: "Email sent succesfuly" });
+      return resolve({ message: "Email sent succesfully" });
     });
   });
 }

@@ -6,7 +6,7 @@ var logger = require('morgan');
 const cors = require('cors')
 const nodemailer = require("nodemailer")
 require('dotenv').config()
-
+const auth = require('./middleware/auth')
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
@@ -112,7 +112,7 @@ app.use('/users', usersRouter);
   ;
 }
 
-app.post("/send_recovery_email", (req, res) => {
+app.post("/send_recovery_email", auth,(req, res) => {
   sendEmail(req.body)
     .then((response) => res.send(response.message))
     .catch((error) => res.status(500).send(error.message));

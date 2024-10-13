@@ -226,7 +226,7 @@ exports.changePassword = [
     asyncHandler(async(req, res, next) => {
         const errors = validationResult(req)
         if(!errors.isEmpty()){
-            return res.json(errors[0].msg)
+            return res.json(errors)
         } else {
 
             const password = await bcrypt.hash(req.body.password, 10)

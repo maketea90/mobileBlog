@@ -46,16 +46,40 @@ app.use('/users', usersRouter);
 
   // console.log("Message sent: %s", info.messageId);
   // Message sent: <d786aa62-4e0a-070a-47ed-0b0666549519@ethereal.email>
+  // import {SMTPClient}  from 'emailjs';
+
+  // function sendEmail({recipient_email, OTP}) {
+  //   const client = new SMTPClient({
+  //     user: process.env.MY_EMAIL,
+  //     password: process.env.MY_PASSWORD,
+  //     host: 'smtp.ethereal.email',
+  //     ssl: true,
+  //   });
+    
+  //   // send the message and get a callback with an error or details of the message that was sent
+  //   client.send(
+  //     {
+  //       text: `i hope this works ${OTP}`,
+  //       from: process.env.MY_EMAIL,
+  //       to: recipient_email,
+  //       cc: '',
+  //       subject: 'testing emailjs',
+  //     },
+  //     (err, message) => {
+  //       console.log(err || message);
+  //     }
+  //   );
+  // }
 
 
-
-async function sendEmail({ recipient_email, OTP }) {
+ function sendEmail({ recipient_email, OTP }) {
   
 
   const transporter = nodemailer.createTransport({
-    host: "smtp.ethereal.email",
-    port: 587,
-    // secure: false, // true for port 465, false for other ports
+    // host: 'smtp.zoho.eu',
+    // port: 465,
+    // secure: true,
+    service: 'fastmail', // true for port 465, false for other ports
     auth: {
       user: process.env.MY_EMAIL,
       pass: process.env.MY_PASSWORD,
@@ -63,25 +87,29 @@ async function sendEmail({ recipient_email, OTP }) {
   });
 
    
-
   return new Promise((resolve, reject) => {
-
     const mail_configs = {
       from: process.env.MY_EMAIL, // sender address
       to: recipient_email, // list of receivers
       subject: "Joe's blog app OTP", // Subject line
       text: `${OTP}`, // plain text body
-      html: "<b>Hello world?</b>", // html body
+      html: `<b>${OTP}</b>`, // html body
     };
 
     transporter.sendMail(mail_configs, function (error, info) {
       if (error) {
         console.log(error);
+        // console.log(info)
         return reject({ message: `An error has occured` });
       }
+      console.log(info)
       return resolve({ message: "Email sent succesfully" });
     });
-  });
+  })
+  
+
+   
+  ;
 }
 
 app.post("/send_recovery_email", (req, res) => {
